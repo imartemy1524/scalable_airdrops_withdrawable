@@ -63,8 +63,10 @@ describe('Airdrop', () => {
                 {
                     helperCode: codeHelper,
                     merkleRoot: BigInt('0x' + dictCell.hash().toString('hex')),
-                    begin: 1100,
+                    // begin: 1100,
                     admin: users[0].address,
+                    // end: 1500,
+                    // jettonWallet: null,
                 },
                 code
             )
@@ -73,7 +75,9 @@ describe('Airdrop', () => {
         const deployResult = await airdrop.sendDeploy(
             users[0].getSender(),
             toNano('0.05'),
-            await jettonMinter.getWalletAddressOf(airdrop.address)
+            await jettonMinter.getWalletAddressOf(airdrop.address),
+            1100,
+            1500
         );
 
         expect(deployResult.transactions).toHaveTransaction({
@@ -93,6 +97,13 @@ describe('Airdrop', () => {
     });
 
     it('should deploy', async () => {
+        const { end, begin, admin, merkleRoot, helperCode, jettonWallet } = await airdrop.getContractData();
+        expect(end).toEqual(1500);
+        expect(begin).toEqual(1100);
+        expect(admin).toEqualAddress(users[0].address);
+        expect(merkleRoot).toEqual(BigInt('0x' + dictCell.hash().toString('hex')));
+        expect(helperCode).toEqualCell(codeHelper);
+        expect(jettonWallet).toEqualAddress(await jettonMinter.getWalletAddressOf(airdrop.address));
         // the check is done inside beforeEach
         // blockchain and airdrop are ready to use
     });
@@ -110,6 +121,28 @@ describe('Airdrop', () => {
             )
         );
         await helper.sendDeploy(users[1].getSender());
+        const result = await helper.sendClaim(123n, merkleProof);
+        expect(result.transactions).toHaveTransaction({
+            on: airdrop.address,
+            success: false,
+            exitCode: 708,
+        });
+        expect(await helper.getClaimed()).toBeFalsy();
+    });
+    it('should not claim after end', async () => {
+        const merkleProof = dictionary.generateMerkleProof(1n);
+        const helper = blockchain.openContract(
+            AirdropHelper.createFromConfig(
+                {
+                    airdrop: airdrop.address,
+                    index: 1n,
+                    proofHash: merkleProof.hash(),
+                },
+                codeHelper
+            )
+        );
+        await helper.sendDeploy(users[1].getSender());
+        blockchain.now = 1800;
         const result = await helper.sendClaim(123n, merkleProof);
         expect(result.transactions).toHaveTransaction({
             on: airdrop.address,
@@ -136,7 +169,6 @@ describe('Airdrop', () => {
         }
 
         blockchain.now = 1100;
-
         {
             const result = await airdrop.sendWithdrawJettons(users[0].getSender(), toNano('0.1'), toNano('1000'));
             expect(result.transactions).toHaveTransaction({
@@ -146,9 +178,26 @@ describe('Airdrop', () => {
             });
         }
     });
+    it('should allow admin to withdraw rewards after end', async () => {
+        blockchain.now = 1600;
+        {
+            const result = await airdrop.sendWithdrawJettons(users[0].getSender(), toNano('0.1'), toNano('1000'));
+            expect(result.transactions).toHaveTransaction({
+                on: airdrop.address,
+                success: true,
+            });
+            expect(
+                await blockchain
+                    .openContract(
+                        JettonWallet.createFromAddress(await jettonMinter.getWalletAddressOf(users[0].address))
+                    )
+                    .getJettonBalance()
+            ).toEqual(toNano('1000'));
+        }
+    })
 
     it('should claim one time', async () => {
-        blockchain.now = 2000;
+        blockchain.now = 1400;
 
         const merkleProof = dictionary.generateMerkleProof(1n);
         const helper = blockchain.openContract(
@@ -176,7 +225,7 @@ describe('Airdrop', () => {
     });
 
     it('should claim many times', async () => {
-        blockchain.now = 2000;
+        blockchain.now = 1400;
 
         for (let i = 0; i < 1000; i += 1 + Math.floor(Math.random() * 25)) {
             const merkleProof = dictionary.generateMerkleProof(BigInt(i));
@@ -208,7 +257,7 @@ describe('Airdrop', () => {
     });
 
     it('should not claim if already did', async () => {
-        blockchain.now = 2000;
+        blockchain.now = 1400;
 
         const merkleProof = dictionary.generateMerkleProof(1n);
 
@@ -266,7 +315,7 @@ describe('Airdrop', () => {
     });
 
     it('should not claim with wrong index', async () => {
-        blockchain.now = 2000;
+        blockchain.now = 1400;
 
         {
             const merkleProof = dictionary.generateMerkleProof(2n);

@@ -32,12 +32,20 @@ export async function run(provider: NetworkProvider) {
             {
                 merkleRoot,
                 helperCode: await compile('AirdropHelper'),
+                admin: provider.sender().address!,
+                jettonWallet: await jettonMinter.getWalletAddressOf(jettonMinterAddress),
             },
             await compile('Airdrop')
         )
     );
 
-    await airdrop.sendDeploy(provider.sender(), toNano('0.05'), await jettonMinter.getWalletAddressOf(airdrop.address));
+    await airdrop.sendDeploy(
+        provider.sender(),
+        toNano('0.05'),
+        await jettonMinter.getWalletAddressOf(airdrop.address),
+        Math.floor(+new Date() / 1000) + 1000,
+        Math.floor(+new Date() / 1000) + 100000
+    );
 
     await provider.waitForDeploy(airdrop.address);
 

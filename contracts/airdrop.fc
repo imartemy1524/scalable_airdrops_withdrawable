@@ -6,6 +6,7 @@ global slice data::jetton_wallet;
 global int data::merkle_root;
 global cell data::helper_code;
 global int data::begin;
+global int data::end;
 global slice data::admin;
 
 global int context::op;
@@ -18,6 +19,7 @@ global int context::query_id;
     data::merkle_root = ds~load_uint(256);
     data::helper_code = ds~load_ref();
     data::begin = ds~load_uint(64);
+    data::end = ds~load_uint(64);
     data::admin = ds~load_msg_addr();
 }
 
@@ -27,6 +29,7 @@ global int context::query_id;
         .store_uint(data::merkle_root, 256)
         .store_ref(data::helper_code)
         .store_uint(data::begin, 64)
+        .store_uint(data::end, 64)
         .store_slice(data::admin)
     .end_cell());
 }
@@ -86,11 +89,13 @@ global int context::query_id;
     if (context::op == op::deploy) {
         throw_unless(error::already_deployed, data::jetton_wallet.preload_uint(2) == 0);
         data::jetton_wallet = in_msg_body~load_msg_addr();
+        data::begin = in_msg_body~load_uint(64);
+        data::end = in_msg_body~load_uint(64);
         save_data();
     }
 
     elseif (context::op == op::process_claim) {
-        throw_unless(error::wrong_time, now() >= data::begin);
+        throw_unless(error::wrong_time, (now() >= data::begin) & (now() < data::end));
 
         cell proof_cell = in_msg_body~load_ref();
         int index = in_msg_body~load_uint(256);
@@ -108,10 +113,10 @@ global int context::query_id;
 
         send_tokens(entry~load_msg_addr(), entry~load_coins());
     }
-
+    ;; admin withdrawl tokens after/before airdrop
     elseif (context::op == op::withdraw_jettons) {
         throw_unless(error::wrong_sender, equal_slices(context::sender, data::admin));
-        throw_unless(error::wrong_time, now() < data::begin);
+        throw_unless(error::wrong_time, (now() < data::begin) | (now() >= data::end));
         int amount = in_msg_body~load_coins();
         send_tokens(context::sender, amount);
     }
@@ -121,7 +126,7 @@ global int context::query_id;
     }
 }
 
-(slice, int, cell, int) get_contract_data() method_id {
+(slice, int, cell, int, int, slice) get_contract_data() method_id {
     load_data();
-    return (data::jetton_wallet, data::merkle_root, data::helper_code, data::begin);
+    return (data::jetton_wallet, data::merkle_root, data::helper_code, data::begin, data::end, data::admin);
 }

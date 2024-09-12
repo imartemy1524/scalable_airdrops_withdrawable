@@ -1,4 +1,4 @@
-# Scalable Airdrop System with date start
+# Scalable Airdrop System with date start / date end
 
 This repository contains an implementation of a Scalable Airdrop System for the TON blockchain. It can be used to distribute Jettons on-chain to any number of wallets.
 
@@ -12,6 +12,7 @@ This repository contains an implementation of a Scalable Airdrop System for the 
     -   [Preparing the list of entries](#preparing-the-list-of-entries)
     -   [Deploying the Airdrop](#deploying-the-airdrop)
     -   [Claiming the Airdrop](#claiming-the-airdrop)
+    -   [Redeeming coins](#redeem-airdrop)
 
 ## Technical description
 
@@ -161,6 +162,10 @@ await helper.sendClaim(0n, proof);
 
 The cell containing dictionary must be stored in some reliable place. It can be your own server, some cloud storage or even TON Storage.
 Make sure to not lose both original list and the cell dictionary at the same time because you will not be able to recover them.
+
+## Redeem airdrop
+
+After airdrop had finished (or it is not started yet), on can withdraw all remaining coins from the airdrop contract.
 
 
 ## License
