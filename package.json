@@ -3,7 +3,7 @@
     "license": "MIT",
     "scripts": {
         "test": "jest",
-        "build": "blueprint build --all && tsc --build"
+        "build": "blueprint build --all"
     },
     "devDependencies": {
         "@ton/blueprint": "^0.12.1",
