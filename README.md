@@ -2,6 +2,10 @@
 
 This repository contains an implementation of a Scalable Airdrop System for the TON blockchain. It can be used to distribute Jettons on-chain to any number of wallets.
 
+### Updates:
+- Smart contract contains start date/end date for airdrop. After end date admin can withdraw all remaining coins from the airdrop contract.
+- No need to send any external messages: claim processed immediately after deploying the smart contract with external message.
+
 ## Table of contents
 
 -   [Technical description](#technical-description)

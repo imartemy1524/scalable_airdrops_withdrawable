@@ -69,7 +69,7 @@ global int context::query_id;
             .store_slice(recipient)
             .store_slice(recipient)
             .store_uint(0, 1)
-            .store_coins(10000000)
+            .store_coins(0)
             .store_uint(0, 1)
         .end_cell())
     .end_cell(), 64);
