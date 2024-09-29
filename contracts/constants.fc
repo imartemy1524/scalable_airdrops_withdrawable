@@ -11,6 +11,8 @@ const int error::already_deployed = 706;
 const int error::wrong_operation = 707;
 const int error::wrong_time = 708;
 
-;; 0.01 ton
-const int const::min_balance = 10000000;
+;; 0.005 ton
+const int const::min_balance = 5000000;
 const int const::fee = 50000000;
+
+const int op::claim_airdrop = 0x1;

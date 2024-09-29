@@ -120,8 +120,7 @@ describe('Airdrop', () => {
                 codeHelper
             )
         );
-        await helper.sendDeploy(users[1].getSender());
-        const result = await helper.sendClaim(123n, merkleProof);
+        const result = await helper.sendDeploy(users[1].getSender(), 123n, merkleProof);
         expect(result.transactions).toHaveTransaction({
             on: airdrop.address,
             success: false,
@@ -141,9 +140,9 @@ describe('Airdrop', () => {
                 codeHelper
             )
         );
-        await helper.sendDeploy(users[1].getSender());
         blockchain.now = 1800;
-        const result = await helper.sendClaim(123n, merkleProof);
+        const result = await helper.sendDeploy(users[1].getSender(), 123n, merkleProof);
+        // const result = await helper.sendClaim();
         expect(result.transactions).toHaveTransaction({
             on: airdrop.address,
             success: false,
@@ -210,8 +209,8 @@ describe('Airdrop', () => {
                 codeHelper
             )
         );
-        await helper.sendDeploy(users[1].getSender());
-        const result = await helper.sendClaim(123n, merkleProof);
+        const result = await helper.sendDeploy(users[1].getSender(), 123n, merkleProof);
+        // const result = await helper.sendClaim();
         expect(result.transactions).toHaveTransaction({
             on: airdrop.address,
             success: true,
@@ -239,8 +238,8 @@ describe('Airdrop', () => {
                     codeHelper
                 )
             );
-            await helper.sendDeploy(users[i].getSender());
-            const result = await helper.sendClaim(123n, merkleProof);
+            const result = await helper.sendDeploy(users[i].getSender(), 123n, merkleProof);
+            // const result = await helper.sendClaim(123n, merkleProof);
             expect(result.transactions).toHaveTransaction({
                 on: airdrop.address,
                 success: true,
@@ -271,10 +270,10 @@ describe('Airdrop', () => {
                 codeHelper
             )
         );
-        await helper.sendDeploy(users[1].getSender());
 
         {
-            const result = await helper.sendClaim(123n, merkleProof);
+            const result = await helper.sendDeploy(users[1].getSender(), 123n, merkleProof);
+            // const result = await helper.sendClaim(123n, merkleProof);
             expect(result.transactions).toHaveTransaction({
                 on: airdrop.address,
                 success: true,
@@ -290,7 +289,12 @@ describe('Airdrop', () => {
         }
 
         {
-            await expect(helper.sendClaim(123n, merkleProof)).rejects.toThrow();
+            const { transactions } = await helper.sendDeploy(users[1].getSender(), 1236n, merkleProof);
+            expect(transactions).toHaveTransaction({
+                from: users[1].address,
+                to: helper.address,
+                success: false,
+            });
             expect(
                 await blockchain
                     .openContract(
@@ -302,7 +306,12 @@ describe('Airdrop', () => {
         }
 
         {
-            await expect(helper.sendClaim(123n, merkleProof)).rejects.toThrow();
+            const { transactions } = await helper.sendDeploy(users[1].getSender(), 1276n, merkleProof);
+            expect(transactions).toHaveTransaction({
+                from: users[1].address,
+                to: helper.address,
+                success: false,
+            });
             expect(
                 await blockchain
                     .openContract(
@@ -329,8 +338,8 @@ describe('Airdrop', () => {
                     codeHelper
                 )
             );
-            await helper.sendDeploy(users[1].getSender());
-            const result = await helper.sendClaim(123n, merkleProof);
+            const result = await helper.sendDeploy(users[1].getSender(), 123n, merkleProof);
+            // const result = await helper.sendClaim(123n, merkleProof);
             expect(result.transactions).toHaveTransaction({
                 from: helper.address,
                 to: airdrop.address,
@@ -357,8 +366,8 @@ describe('Airdrop', () => {
                     codeHelper
                 )
             );
-            await helper.sendDeploy(users[1].getSender());
-            const result = await helper.sendClaim(123n, merkleProof);
+            const result = await helper.sendDeploy(users[1].getSender(), 123n, merkleProof);
+            // const result = await helper.sendClaim(123n, merkleProof);
             expect(result.transactions).toHaveTransaction({
                 from: helper.address,
                 to: airdrop.address,

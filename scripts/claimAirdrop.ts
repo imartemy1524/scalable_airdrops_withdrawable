@@ -26,9 +26,7 @@ export async function run(provider: NetworkProvider) {
     );
 
     if (!(await provider.isContractDeployed(helper.address))) {
-        await helper.sendDeploy(provider.sender());
+        await helper.sendDeploy(provider.sender(), 123n, proof);
         await provider.waitForDeploy(helper.address);
     }
-
-    await helper.sendClaim(123n, proof); // 123 -> any query_id
 }
